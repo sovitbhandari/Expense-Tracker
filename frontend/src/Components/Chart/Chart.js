@@ -17,8 +17,12 @@ ChartJs.register(
 
 function IncomeExpensePieChart() {
     const { incomes, expenses } = useGlobalContext();
-    const [chartType, setChartType] = useState('income'); // State to track which chart is displayed
-    const [loading, setLoading] = useState(false); // Loading state
+    const [chartType, setChartType] = useState('income'); // Track which chart to display
+    const [loading, setLoading] = useState(false); // Loading state for chart switch
+
+    // Handle no data available fallback
+    const hasIncomeData = incomes && incomes.length > 0;
+    const hasExpenseData = expenses && expenses.length > 0;
 
     // Prepare income data for the pie chart
     const incomeData = {
@@ -29,6 +33,7 @@ function IncomeExpensePieChart() {
                 data: incomes.map((income) => income.amount),
                 backgroundColor: ['#4CAF50', '#FFEB3B', '#00BCD4', '#FF5722', '#9C27B0', '#03A9F4', '#8BC34A'],
                 borderWidth: 1,
+                hoverOffset: 10,
             },
         ],
     };
@@ -42,14 +47,15 @@ function IncomeExpensePieChart() {
                 data: expenses.map((expense) => expense.amount),
                 backgroundColor: ['#673AB7', '#FF9800', '#03A9F4', '#9E9E9E', '#607D8B', '#795548'],
                 borderWidth: 1,
+                hoverOffset: 10,
             },
         ],
     };
 
-    // Add a loading state while switching between charts
+    // Simulate loading state during chart switching
     useEffect(() => {
         setLoading(true);
-        const timer = setTimeout(() => setLoading(false), 300); // Simulate chart loading time
+        const timer = setTimeout(() => setLoading(false), 300); // Simulate a short loading delay
         return () => clearTimeout(timer);
     }, [chartType]);
 
@@ -63,7 +69,16 @@ function IncomeExpensePieChart() {
                     {loading && chartType === 'expense' ? 'Loading...' : 'Expenses'}
                 </button>
             </ButtonContainer>
-            <Pie data={chartType === 'income' ? incomeData : expenseData} />
+            
+            {loading ? (
+                <LoadingMessage>Loading chart data...</LoadingMessage>
+            ) : chartType === 'income' && hasIncomeData ? (
+                <Pie data={incomeData} />
+            ) : chartType === 'expense' && hasExpenseData ? (
+                <Pie data={expenseData} />
+            ) : (
+                <NoDataMessage>No data available for {chartType === 'income' ? 'income' : 'expenses'}</NoDataMessage>
+            )}
         </ChartStyled>
     );
 }
@@ -93,7 +108,7 @@ const ButtonContainer = styled.div`
         cursor: pointer;
         font-size: 1rem;
         transition: background-color 0.3s, opacity 0.3s;
-        pointer-events: ${props => (props.disabled ? 'none' : 'auto')}; /* Disable pointer events when loading */
+        pointer-events: ${props => (props.disabled ? 'none' : 'auto')}; 
         
         &:hover {
             opacity: 0.9;
@@ -115,6 +130,20 @@ const ButtonContainer = styled.div`
             background-color: #D32F2F;
         }
     }
+`;
+
+const LoadingMessage = styled.div`
+    text-align: center;
+    font-size: 1.2rem;
+    color: #888;
+    margin-top: 2rem;
+`;
+
+const NoDataMessage = styled.div`
+    text-align: center;
+    font-size: 1.2rem;
+    color: #ff5722;
+    margin-top: 2rem;
 `;
 
 export default IncomeExpensePieChart;

@@ -1,27 +1,21 @@
-// backend/models/incomeModel.js
 const mongoose = require('mongoose');
 
-const IncomeSchema = new mongoose.Schema({
+// Define the schema for income
+const incomeSchema = new mongoose.Schema({
     amount: {
         type: Number,
-        required: true,
-        maxLength: 20,
-        trim: true
-    },
-    date: {
-        type: Date,
-        required: true,
-        trim: true
+        required: true
     },
     category: {
         type: String,
-        required: true,
-        trim: true,
+        required: true
     },
-    customCategory: {
-        type: String,
-        trim: true
-    },
-}, { timestamps: true });
+    date: {
+        type: Date,
+        default: Date.now
+    }
+});
 
-module.exports = mongoose.model('Income', IncomeSchema);
+const Income = mongoose.model('Income', incomeSchema);
+
+module.exports = Income;

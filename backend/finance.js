@@ -1,36 +1,25 @@
-require('dotenv').config();
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
-const { db } = require('./db/db');
-const fs = require('fs');
-const path = require('path');
+const financeRoutes = require('./routes/financeRoutes');  // Import the income/expense routes
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Default to 3000 if PORT is not set
+const PORT = 5001;
 
-// Middlewares
-app.use(express.json());
+// Middleware
 app.use(cors());
+app.use(express.json());  // To parse JSON request bodies
 
-// Dynamic route loading
-fs.readdirSync(path.join(__dirname, 'routes')).forEach((file) => {
-    if (file.endsWith('.js')) {
-        const routePath = path.join(__dirname, 'routes', file);
-        const route = require(routePath);
-        app.use(`/api/v1/${file.replace('.js', '')}`, route);
-    }
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/financeDB', {
+})
+.then(() => console.log('DB Connected'))
+.catch((err) => console.log('DB Connection Error:', err));
+
+// Routes
+app.use('/api/v1', financeRoutes); // Mount the routes under /api/v1
+
+// Start the server
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
-
-// Server initialization
-const startServer = () => {
-    db(); // Ensure this function connects to your database
-    app.listen(PORT, () => {
-        console.log(`Server is listening on port ${PORT}`);
-    });
-};
-
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
-});
-
-startServer();

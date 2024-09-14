@@ -1,18 +1,25 @@
-
-import React, { useEffect } from 'react'
-import styled from 'styled-components'
+import React, { useEffect } from 'react';
+import styled from 'styled-components';
 import { useGlobalContext } from '../../context/globalContext';
 import History from '../../History/History';
 import { dollar } from '../../utils/Icons';
 import Chart from '../Chart/Chart';
 
 function Dashboard() {
-    const { totalExpenses, totalIncome, totalBalance, getIncomes, getExpenses } = useGlobalContext();
+    // Fetching the context values and functions
+    const { 
+        calculateTotalIncome, 
+        calculateTotalExpenses, 
+        calculateTotalBalance, 
+        fetchIncomes, 
+        fetchExpenses 
+    } = useGlobalContext();
 
+    // Fetch incomes and expenses when the component mounts
     useEffect(() => {
-        getIncomes();
-        getExpenses();
-    }, [getIncomes, getExpenses]);
+        fetchIncomes();
+        fetchExpenses();
+    }, [fetchIncomes, fetchExpenses]);
 
     return (
         <DashboardStyled>
@@ -21,7 +28,7 @@ function Dashboard() {
                 <Chart />
                 <div className="balance">
                     <h2>Remaining Balance</h2>
-                    <p>{dollar} {totalBalance()}</p>
+                    <p>{dollar} {calculateTotalBalance()}</p>
                 </div>
             </div>
             <div className="stats-con">
@@ -29,11 +36,11 @@ function Dashboard() {
                     <div className="amount-con">
                         <div className="income">
                             <h2>Total Income</h2>
-                            <p>{dollar} {totalIncome()}</p>
+                            <p>{dollar} {calculateTotalIncome()}</p>
                         </div>
                         <div className="expense">
                             <h2>Total Expense</h2>
-                            <p>{dollar} {totalExpenses()}</p>
+                            <p>{dollar} {calculateTotalExpenses()}</p>
                         </div>
                     </div>
                 </div>
@@ -61,18 +68,19 @@ const DashboardStyled = styled.div`
         h1{
             margin-bottom: 1rem;
             color: wheat;
-            text-align:center;
-            z-index:999;
+            text-align: center;
+            z-index: 999;
         }
-        .balance{
+
+        .balance {
             background: white;
-            margin-top:3rem;
+            margin-top: 3rem;
             border: 2px solid #FFFFFF;
             box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
             border-radius: 20px;
             padding: 1rem;
-            z-index:999;
-            white-space: nowrap; /* Prevent text wrapping */
+            z-index: 999;
+            white-space: nowrap;
 
             h2 {
                 font-size: 1.7rem;
@@ -92,25 +100,25 @@ const DashboardStyled = styled.div`
         flex-direction: column;
         gap: 2rem;
         width: 100%;
-        
+
         .chart-con {
             .amount-con {
                 display: flex;
-                align-item:center;
+                align-item: center;
                 justify-content: space-evenly;
                 gap: 0.3rem;
                 margin-top: 2rem;
                 width: 95%;
 
-                .income, .expense{
+                .income, .expense {
                     background: #FCF6F9;
                     border: 2px solid #FFFFFF;
                     box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
                     border-radius: 15px;
                     padding: 0.8rem;
-                    z-index:999;
-                    white-space: nowrap; /* Prevent text wrapping */
-                    overflow: hidden; /* Hide overflowed content */
+                    z-index: 999;
+                    white-space: nowrap;
+                    overflow: hidden;
 
                     h2 {
                         font-size: 1.7rem;
@@ -126,7 +134,6 @@ const DashboardStyled = styled.div`
         }
 
         .history-con {
-            /* Adjust to fill remaining space below chart */
             h2 {
                 margin: 1rem 0;
                 display: flex;
@@ -136,25 +143,27 @@ const DashboardStyled = styled.div`
         }
     }
 
-    @media (max-width: 900px) { 
+    @media (max-width: 900px) {
         flex-direction: column;
         justify-content: space-between;
         height: auto;
         margin: 0 auto;
 
         .chart-container, .stats-con {
-            width: 100%; 
+            width: 100%;
             overflow: auto;
         }
-            
+
         .chart-container {
-            margin-bottom: 2rem; 
+            margin-bottom: 2rem;
         }
+    }
 
     @media (max-width: 600px) {
         .chart-container {
             transform: scale(0.9);
-            .balance{
+            
+            .balance {
                 h2 {
                     font-size: 1.5rem;
                     font-weight: bold;
@@ -173,7 +182,8 @@ const DashboardStyled = styled.div`
                 .amount-con {
                     margin-top: 0rem;
                     width: 100%;
-                    .income, .expense{
+                    
+                    .income, .expense {
                         h2 {
                             font-size: 1.5rem;
                             font-weight: bold;
@@ -186,6 +196,8 @@ const DashboardStyled = styled.div`
                     }
                 }
             }
+        }
+    }
 `;
 
 export default Dashboard;

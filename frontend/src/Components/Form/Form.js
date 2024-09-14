@@ -22,9 +22,8 @@ function Form() {
         setError('');
     };
 
-    const handleSubmit = e => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        
         if (!amount || !date || !category || (category === 'other' && !customCategory)) {
             setError('Please fill in all required fields.');
             return;
@@ -32,14 +31,14 @@ function Form() {
     
         const finalCategory = category === 'other' ? customCategory : category;
     
-        addIncome({ amount, date, category: finalCategory});
-        setInputState({
-            amount: '',
-            date: '',
-            category: '',
-            customCategory: '',
-        });
+        try {
+            await addIncome({ amount, date, category: finalCategory }); // Make sure this is correct
+            setInputState({ amount: '', date: '', category: '', customCategory: '' });
+        } catch (error) {
+            console.error(error);
+        }
     };
+    
     
     return (
         <FormStyled onSubmit={handleSubmit}>

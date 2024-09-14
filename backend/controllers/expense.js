@@ -1,4 +1,13 @@
-const ExpenseSchema = require("../models/ExpenseModel");
+const ExpenseSchema = require('../models/ExpenseModel');
+
+exports.getExpense = async (req, res) => {
+    try {
+        const expenses = await ExpenseSchema.find().sort({ createdAt: -1 });
+        return res.status(200).json(expenses);
+    } catch (error) {
+        return res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
 
 exports.addExpense = async (req, res) => {
     let { amount, date, category, customCategory } = req.body;
@@ -24,15 +33,6 @@ exports.addExpense = async (req, res) => {
         return res.status(200).json({ message: 'Expense Added' });
     } catch (error) {
         return res.status(500).json({ message: 'Server Error', error: error.message });
-    }
-};
-
-exports.getExpense = async (req, res) => {
-    try {
-        const expenses = await ExpenseSchema.find().sort({ createdAt: -1 });
-        res.status(200).json(expenses);
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
     }
 };
 

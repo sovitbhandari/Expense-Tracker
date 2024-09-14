@@ -7,7 +7,7 @@ import IncomeItem from '../IncomeItem/IncomeItem';
 import { plus } from '../../utils/Icons';
 import Modal from '../Modal/Modal';
 
-// Define these functions to group and sort expenses by month
+// Function to group and sort expenses by month
 const groupExpensesByMonth = (expenses) => {
     return expenses.reduce((acc, expense) => {
         const month = new Date(expense.date).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -29,26 +29,21 @@ const sortExpensesByDate = (groupedExpenses) => {
 };
 
 function Expenses() {
-    const { expenses, getExpenses, deleteExpense, totalExpenses } = useGlobalContext();
+    const { expenses, fetchExpenses, removeExpense, calculateTotalExpenses } = useGlobalContext(); // Updated to reflect new function names
     const [groupedExpenses, setGroupedExpenses] = useState({});
     const [sortedMonths, setSortedMonths] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        const fetchExpenses = async () => {
-            try {
-                await getExpenses();
-                const grouped = groupExpensesByMonth(expenses);
-                const { sortedMonths, sortedExpenses } = sortExpensesByDate(grouped);
-                setGroupedExpenses(sortedExpenses);
-                setSortedMonths(sortedMonths);
-            } catch (error) {
-                console.error('Failed to fetch expenses:', error);
-            }
+        const fetchAndGroupExpenses = async () => {
+            await fetchExpenses(); // Fetch expenses using the new function name
+            const grouped = groupExpensesByMonth(expenses);
+            const { sortedMonths, sortedExpenses } = sortExpensesByDate(grouped);
+            setGroupedExpenses(sortedExpenses);
+            setSortedMonths(sortedMonths);
         };
-        fetchExpenses();
-    }, [getExpenses, expenses]); // Include expenses here
-    
+        fetchAndGroupExpenses();
+    }, [fetchExpenses, expenses]);
 
     return (
         <ExpenseStyled>
@@ -56,7 +51,7 @@ function Expenses() {
                 <div className="header">
                     <div className="total-expense-container">
                         <h2 className="total-expense">
-                            Total Expense: <span>${totalExpenses()}</span>
+                            Total Expense: <span>${calculateTotalExpenses()}</span> {/* Updated to use calculateTotalExpenses */}
                         </h2>
                         <button className="add-expense-button" onClick={() => setIsModalOpen(true)}>
                             {plus} Add Expense
@@ -82,7 +77,7 @@ function Expenses() {
                                         type={type}
                                         category={category}
                                         indicatorColor="var(--color-red)"
-                                        deleteItem={deleteExpense}
+                                        deleteItem={removeExpense}
                                     />
                                 );
                             })}
@@ -161,7 +156,6 @@ const ExpenseStyled = styled.div`
                 margin-bottom: 1rem;
                 width: fit-content;
                 padding: 10px;
-                font-size: 1rem;
                 border-radius: 10px;
                 color: Black;
                 opacity: 1;

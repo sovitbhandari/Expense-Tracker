@@ -7,7 +7,7 @@ import IncomeItem from '../IncomeItem/IncomeItem';
 import { plus } from '../../utils/Icons';
 import Modal from '../Modal/Modal';
 
-// Define these functions within the Income.js file
+// Group incomes by month
 const groupIncomesByMonth = (incomes) => {
     return incomes.reduce((acc, income) => {
         const month = new Date(income.date).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -19,31 +19,42 @@ const groupIncomesByMonth = (incomes) => {
     }, {});
 };
 
+// Sort incomes by date
 const sortIncomesByDate = (groupedIncomes) => {
-    const sortedMonths = Object.keys(groupedIncomes).sort((a, b) => new Date(b) - new Date(a));
+    const sortedMonths = Object.keys(groupedIncomes).sort((a, b) => {
+        const [monthA, yearA] = a.split(' ');
+        const [monthB, yearB] = b.split(' ');
+
+        const dateA = new Date(`${monthA} 1, ${yearA}`);
+        const dateB = new Date(`${monthB} 1, ${yearB}`);
+
+        return dateB - dateA; // Sort descending by date
+    });
+
     const sortedIncomes = sortedMonths.reduce((acc, month) => {
         acc[month] = groupedIncomes[month].sort((a, b) => new Date(b.date) - new Date(a.date));
         return acc;
     }, {});
+
     return { sortedMonths, sortedIncomes };
 };
 
 function Income() {
-    const { incomes, getIncomes, deleteIncome, totalIncome } = useGlobalContext();
+    const { incomes, fetchIncomes, removeIncome, calculateTotalIncome } = useGlobalContext(); // Updated to reflect the new function names
     const [groupedIncomes, setGroupedIncomes] = useState({});
     const [sortedMonths, setSortedMonths] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        const fetchIncomes = async () => {
-            await getIncomes();
+        const fetchAndGroupIncomes = async () => {
+            await fetchIncomes();
             const grouped = groupIncomesByMonth(incomes);
             const { sortedMonths, sortedIncomes } = sortIncomesByDate(grouped);
             setGroupedIncomes(sortedIncomes);
             setSortedMonths(sortedMonths);
         };
-        fetchIncomes();
-    }, [getIncomes, incomes]);
+        fetchAndGroupIncomes();
+    }, [fetchIncomes, incomes]);
 
     return (
         <IncomeStyled>
@@ -51,7 +62,7 @@ function Income() {
                 <div className="header">
                     <div className="total-income-container">
                         <h2 className="total-income">
-                            Total Income: <span>${totalIncome()}</span>
+                            Total Income: <span>${calculateTotalIncome()}</span> {/* Updated to use the new calculateTotalIncome */}
                         </h2>
                         <button className="add-income-button" onClick={() => setIsModalOpen(true)}>
                             {plus} Add Income
@@ -66,19 +77,18 @@ function Income() {
                         <div key={month} className="month-group">
                             <h3>{month}</h3>
                             {groupedIncomes[month].map((income) => {
-                                const { _id, title, amount, date, category, description, type } = income;
+                                const { _id, title, amount, date, category, type } = income;
                                 return (
                                     <IncomeItem
                                         key={_id}
                                         id={_id}
                                         title={title}
-                                        description={description}
                                         amount={amount}
                                         date={date}
                                         type={type}
                                         category={category}
                                         indicatorColor="var(--color-green)"
-                                        deleteItem={deleteIncome}
+                                        deleteItem={removeIncome} // Updated to use removeIncome
                                     />
                                 );
                             })}
@@ -93,7 +103,8 @@ function Income() {
 const IncomeStyled = styled.div`
     display: flex;
     flex-direction: column;
-    overflow: auto;
+    overflow-y: auto;
+    height: 90vh;
     
     .header {
         display: flex;
@@ -105,12 +116,12 @@ const IncomeStyled = styled.div`
         display: flex;
         align-items: center;
         gap: 2rem;
-        z-index:998;
+        z-index: 998;
     }
 
     .total-income {
-        color: #222260
-        z-index:999;
+        color: #222260;
+        z-index: 999;
         background: wheat;
         border: 2px solid #FFFFFF;
         box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
@@ -128,7 +139,7 @@ const IncomeStyled = styled.div`
 
     .add-income-button {
         font-size: 1.3rem;
-        z-index:998;
+        z-index: 998;
         background-color: var(--color-accent);
         color: white;
         border: none;
@@ -145,27 +156,31 @@ const IncomeStyled = styled.div`
     }
 
     .incomes {
-        margin-top:3rem;
+        margin-top: 3rem;
         .month-group {
-            // background: #FCF6F9;
-            // border: 1px solid #343434;
-            // box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
             border-radius: 10px;
-            // padding: 1rem;
             margin-bottom: 1rem;
             margin-top: 3rem;
-            opacity:1;
+            opacity: 1;
             z-index: 1000;
             h3 {
                 background: #FCF6F9;
-                margin-bottom: 1rem;
+                margin-bottom: 0.8rem;
                 width: fit-content;
-                padding:10px;
-                border-radius:10px;
+                padding: 10px;
+                font-size: 1rem;
+                border-radius: 10px;
                 color: Black;
-                opacity:1;
+                opacity: 1;
             }
-       
+        }
+    }
+
+    @media (max-width: 700px) {
+        .header .total-income-container {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
     }
 `;
