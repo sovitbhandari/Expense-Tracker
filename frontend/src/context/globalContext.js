@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useContext, useState, useEffect } from "react";
 
 // Define the base URL for the API
-const BASE_URL = "https://expense-tracker-backend-p7b5.onrender.com/";
+const BASE_URL = "https://expense-tracker-backend-p7b5.onrender.com/api/v1/";
 
 // Create a context for global state management
 const GlobalContext = React.createContext();
