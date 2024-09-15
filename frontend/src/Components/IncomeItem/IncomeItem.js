@@ -48,7 +48,7 @@ function IncomeItem({
                 return circle;
             default:
                 console.warn('No matching category:', category);
-                return circle; // A fallback icon or placeholder
+                return circle; 
         }
     };
 

@@ -156,6 +156,7 @@ const ExpenseStyled = styled.div`
                 margin-bottom: 1rem;
                 width: fit-content;
                 padding: 10px;
+                font-size: 1rem;
                 border-radius: 10px;
                 color: Black;
                 opacity: 1;
