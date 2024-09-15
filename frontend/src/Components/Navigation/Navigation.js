@@ -119,8 +119,9 @@ const Header = styled.div`
     z-index: 1000;
     height: 80px;
 
-    @media (max-width: 768px) {
-        padding: 0 1rem;
+    @media (max-width: 600px) {
+        width:100%;
+        height:70px;
     }
 `;
 
@@ -310,5 +311,7 @@ const CloseButton = styled.span`
         color: red;
     }
 `;
+
+
 
 export default Navigation;

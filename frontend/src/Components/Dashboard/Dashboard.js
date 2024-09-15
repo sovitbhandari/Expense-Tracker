@@ -36,11 +36,11 @@ function Dashboard() {
                     <div className="amount-con">
                         <div className="income">
                             <h2>Total Income</h2>
-                            <p>{dollar} {calculateTotalIncome()}</p>
+                            <p id="total-income">{dollar} {calculateTotalIncome()}</p>
                         </div>
                         <div className="expense">
                             <h2>Total Expense</h2>
-                            <p>{dollar} {calculateTotalExpenses()}</p>
+                            <p id="total-expense">{dollar} {calculateTotalExpenses()}</p>
                         </div>
                     </div>
                 </div>
@@ -64,6 +64,7 @@ const DashboardStyled = styled.div`
         justify-content: center;
         align-items: center;
         width: 100%;
+        z-index: 999;
 
         h1{
             margin-bottom: 1rem;
@@ -148,10 +149,11 @@ const DashboardStyled = styled.div`
         justify-content: space-between;
         height: auto;
         margin: 0 auto;
+        gap: 1rem;
 
         .chart-container, .stats-con {
             width: 100%;
-            overflow: auto;
+            z-index: 999;
         }
 
         .chart-container {
@@ -164,8 +166,9 @@ const DashboardStyled = styled.div`
             transform: scale(0.9);
             
             .balance {
+                padding: 0.5rem;
                 h2 {
-                    font-size: 1.5rem;
+                    font-size: 1.4rem;
                     font-weight: bold;
                 }
 
@@ -180,18 +183,28 @@ const DashboardStyled = styled.div`
         .stats-con {
             .chart-con {
                 .amount-con {
+                    width:100%;
                     margin-top: 0rem;
-                    width: 100%;
                     
                     .income, .expense {
+                        padding: 0.5rem;
+
+                        #total-income{
+                            color: var(--color-green);
+                        }
+
+                        #total-expense{
+                            color: var(--color-red);
+                        }
+
                         h2 {
-                            font-size: 1.5rem;
+                            font-size: 1rem;
                             font-weight: bold;
                         }
 
                         p {
-                            font-weight: 500;
-                            font-size: 1.3rem;
+                            font-weight: 600;
+                            font-size: 1rem;
                         }
                     }
                 }

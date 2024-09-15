@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-    Chart as ChartJs, 
+    Chart as ChartJs,
     ArcElement,
     Tooltip,
     Legend,
@@ -9,11 +9,7 @@ import { Pie } from 'react-chartjs-2';
 import styled from 'styled-components';
 import { useGlobalContext } from '../../context/globalContext';
 
-ChartJs.register(
-    ArcElement,
-    Tooltip,
-    Legend
-);
+ChartJs.register(ArcElement, Tooltip, Legend);
 
 function IncomeExpensePieChart() {
     const { incomes, expenses } = useGlobalContext();
@@ -21,36 +17,36 @@ function IncomeExpensePieChart() {
     const [loading, setLoading] = useState(false); // Loading state for chart switch
 
     // Handle no data available fallback
-    const hasIncomeData = incomes && incomes.length > 0;
-    const hasExpenseData = expenses && expenses.length > 0;
+    const hasIncomeData = useMemo(() => incomes && incomes.length > 0, [incomes]);
+    const hasExpenseData = useMemo(() => expenses && expenses.length > 0, [expenses]);
 
     // Prepare income data for the pie chart
-    const incomeData = {
-        labels: incomes.map((income) => income.category),
+    const incomeData = useMemo(() => ({
+        labels: incomes.map(income => income.category),
         datasets: [
             {
                 label: 'Income by Category',
-                data: incomes.map((income) => income.amount),
+                data: incomes.map(income => income.amount),
                 backgroundColor: ['#4CAF50', '#FFEB3B', '#00BCD4', '#FF5722', '#9C27B0', '#03A9F4', '#8BC34A'],
                 borderWidth: 1,
                 hoverOffset: 10,
             },
         ],
-    };
+    }), [incomes]);
 
     // Prepare expense data for the pie chart
-    const expenseData = {
-        labels: expenses.map((expense) => expense.category),
+    const expenseData = useMemo(() => ({
+        labels: expenses.map(expense => expense.category),
         datasets: [
             {
                 label: 'Expenses by Category',
-                data: expenses.map((expense) => expense.amount),
+                data: expenses.map(expense => expense.amount),
                 backgroundColor: ['#673AB7', '#FF9800', '#03A9F4', '#9E9E9E', '#607D8B', '#795548'],
                 borderWidth: 1,
                 hoverOffset: 10,
             },
         ],
-    };
+    }), [expenses]);
 
     // Simulate loading state during chart switching
     useEffect(() => {
@@ -59,29 +55,39 @@ function IncomeExpensePieChart() {
         return () => clearTimeout(timer);
     }, [chartType]);
 
+    // Pie chart options: Disable animation
+    const chartOptions = {
+        animation: {
+            duration: 0, // Instant animation (set this higher for faster animation)
+        },
+    };
+
     return (
         <ChartStyled>
             <ButtonContainer>
-                <button onClick={() => setChartType('income')} disabled={loading}>
+                <button onClick={() => setChartType('income')} disabled={loading || chartType === 'income'}>
                     {loading && chartType === 'income' ? 'Loading...' : 'Income'}
                 </button>
-                <button onClick={() => setChartType('expense')} disabled={loading}>
+                <button onClick={() => setChartType('expense')} disabled={loading || chartType === 'expense'}>
                     {loading && chartType === 'expense' ? 'Loading...' : 'Expenses'}
                 </button>
             </ButtonContainer>
-            
+
             {loading ? (
                 <LoadingMessage>Loading chart data...</LoadingMessage>
             ) : chartType === 'income' && hasIncomeData ? (
-                <Pie data={incomeData} />
+                <PieChartMemo data={incomeData} options={chartOptions} />
             ) : chartType === 'expense' && hasExpenseData ? (
-                <Pie data={expenseData} />
+                <PieChartMemo data={expenseData} options={chartOptions} />
             ) : (
                 <NoDataMessage>No data available for {chartType === 'income' ? 'income' : 'expenses'}</NoDataMessage>
             )}
         </ChartStyled>
     );
 }
+
+// Memoize Pie component to prevent unnecessary re-renders
+const PieChartMemo = React.memo(({ data, options }) => <Pie data={data} options={options} />);
 
 const ChartStyled = styled.div`
     background: #FCF6F9;
