@@ -53,9 +53,6 @@ const AppStyled = styled.div`
   display: flex;
   flex-direction: column;
   height:100vh;
-  body::-webkit-scrollbar {
-    display: none; /* Hide scrollbar on WebKit browsers (Chrome, Safari) */
-  }
 
   main {
     margin-top: 3rem;
@@ -63,6 +60,7 @@ const AppStyled = styled.div`
     overflow-y: auto;  
     &::-webkit-scrollbar {
       width: 0;
+      display: none;
     }
   }
 `;
