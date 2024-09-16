@@ -53,6 +53,9 @@ const AppStyled = styled.div`
   display: flex;
   flex-direction: column;
   height:100vh;
+  body::-webkit-scrollbar {
+    display: none; /* Hide scrollbar on WebKit browsers (Chrome, Safari) */
+  }
 
   main {
     margin-top: 3rem;
