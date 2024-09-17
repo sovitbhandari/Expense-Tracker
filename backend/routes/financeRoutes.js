@@ -3,19 +3,20 @@ const mongoose = require('mongoose');  // Import mongoose to validate ObjectIds
 const router = express.Router();
 const Income = require('../models/IncomeModel');  // Import the Income model
 const Expense = require('../models/ExpenseModel'); // Import the Expense model
+const { protect } = require('../middleware/authMiddleware');  // Import auth middleware
 
-// Route to get all incomes
-router.get('/get-incomes', async (req, res) => {
+// Route to get all incomes for authenticated user
+router.get('/get-incomes', protect, async (req, res) => {
     try {
-        const incomes = await Income.find(); // Fetch all incomes
+        const incomes = await Income.find({ user: req.user.id }); // Fetch incomes for the logged-in user
         res.status(200).json(incomes);       // Send the data
     } catch (error) {
         res.status(500).json({ message: 'Error fetching incomes', error: error.message });
     }
 });
 
-// Route to add an income
-router.post('/add-income', async (req, res) => {
+// Route to add an income for authenticated user
+router.post('/add-income', protect, async (req, res) => {
     const { amount, category, description, date } = req.body;  // Accept date from request body
 
     if (!amount || !category) {  // Basic validation
@@ -24,6 +25,7 @@ router.post('/add-income', async (req, res) => {
 
     try {
         const newIncome = new Income({
+            user: req.user.id, // Attach the logged-in user to the income
             amount,
             category,
             description,
@@ -36,8 +38,8 @@ router.post('/add-income', async (req, res) => {
     }
 });
 
-// Route to delete an income by ID
-router.delete('/delete-income/:id', async (req, res) => {
+// Route to delete an income by ID for authenticated user
+router.delete('/delete-income/:id', protect, async (req, res) => {
     const { id } = req.params;
 
     // Validate ObjectId
@@ -46,7 +48,8 @@ router.delete('/delete-income/:id', async (req, res) => {
     }
 
     try {
-        const deletedIncome = await Income.findByIdAndDelete(id);
+        // Find the income and ensure it belongs to the authenticated user
+        const deletedIncome = await Income.findOneAndDelete({ _id: id, user: req.user.id });
         if (!deletedIncome) {
             return res.status(404).json({ message: 'Income not found' });
         }
@@ -57,18 +60,18 @@ router.delete('/delete-income/:id', async (req, res) => {
     }
 });
 
-// Route to get all expenses
-router.get('/get-expenses', async (req, res) => {
+// Route to get all expenses for authenticated user
+router.get('/get-expenses', protect, async (req, res) => {
     try {
-        const expenses = await Expense.find();  // Fetch all expenses
+        const expenses = await Expense.find({ user: req.user.id });  // Fetch expenses for the logged-in user
         res.status(200).json(expenses);         // Send the data
     } catch (error) {
         res.status(500).json({ message: 'Error fetching expenses', error: error.message });
     }
 });
 
-// Route to add an expense
-router.post('/add-expense', async (req, res) => {
+// Route to add an expense for authenticated user
+router.post('/add-expense', protect, async (req, res) => {
     const { amount, category, description, date } = req.body;  // Accept date from request body
 
     if (!amount || !category) {  // Basic validation
@@ -77,6 +80,7 @@ router.post('/add-expense', async (req, res) => {
 
     try {
         const newExpense = new Expense({
+            user: req.user.id, // Attach the logged-in user to the expense
             amount,
             category,
             description,
@@ -89,8 +93,8 @@ router.post('/add-expense', async (req, res) => {
     }
 });
 
-// Route to delete an expense by ID
-router.delete('/delete-expense/:id', async (req, res) => {
+// Route to delete an expense by ID for authenticated user
+router.delete('/delete-expense/:id', protect, async (req, res) => {
     const { id } = req.params;
 
     // Validate ObjectId
@@ -99,7 +103,8 @@ router.delete('/delete-expense/:id', async (req, res) => {
     }
 
     try {
-        const deletedExpense = await Expense.findByIdAndDelete(id);
+        // Find the expense and ensure it belongs to the authenticated user
+        const deletedExpense = await Expense.findOneAndDelete({ _id: id, user: req.user.id });
         if (!deletedExpense) {
             return res.status(404).json({ message: 'Expense not found' });
         }
