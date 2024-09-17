@@ -2,14 +2,25 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import maleIcon from '../../img/male.png';
 import femaleIcon from '../../img/female.png';
-import { signout, burgerIcon } from '../../utils/Icons';
+import { signout, burgerIcon, signinIcon } from '../../utils/Icons';
 import { menuItems } from '../../utils/menuItems';
 import { useGlobalContext } from '../../context/globalContext';
+import SignInForm from '../Auth/SignInUp'; 
 
 function Navigation({ active, setActive }) {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal visibility
-    const { userPreferences, updateUserPreferences, setIncomes, setExpenses, setError } = useGlobalContext();
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); 
+    const [isSignInModalOpen, setIsSignInModalOpen] = useState(false); 
+    const { 
+        userPreferences, 
+        updateUserPreferences, 
+        updateProfile,  
+        setIncomes, 
+        setExpenses, 
+        setError,
+        signOut,
+        isAuthenticated
+    } = useGlobalContext();
 
     const handleMenuItemClick = (id) => {
         setActive(id);
@@ -24,22 +35,30 @@ function Navigation({ active, setActive }) {
         updateUserPreferences({ avatar: e.target.value });
     };
 
-    const handleSignOut = () => {
-        // Clear user preferences
-        updateUserPreferences({ name: 'User', avatar: 'male' });
+    const handleProfileSave = async () => {
+        try {
+            const success = await updateProfile({
+                name: userPreferences.name,
+                avatar: userPreferences.avatar
+            });
 
-        // Clear incomes and expenses
+            if (success) {
+                setIsProfileModalOpen(false); // Close modal after successful save
+            } else {
+                setError('Error updating profile');
+            }
+        } catch (error) {
+            console.error('Profile update error:', error);
+            setError('Error updating profile');
+        }
+    };
+
+    const handleSignOut = () => {
+        updateUserPreferences({ name: 'User', avatar: 'male' });
         setIncomes([]);
         setExpenses([]);
-
-        // Clear any errors
         setError(null);
-
-        // Clear localStorage to ensure persistence data is removed
-        localStorage.removeItem('userPreferences');
-        localStorage.removeItem('incomes');
-        localStorage.removeItem('expenses');
-        localStorage.clear();  // Optionally clear all of localStorage, if needed
+        signOut();
     };
 
     return (
@@ -51,7 +70,7 @@ function Navigation({ active, setActive }) {
                 />
                 <div className="text">
                     <h2>{userPreferences.name}</h2>
-                    <EditIcon onClick={() => setIsModalOpen(true)}>✎</EditIcon> {/* Edit icon */}
+                    <EditIcon onClick={() => setIsProfileModalOpen(true)}>✎</EditIcon> 
                 </div>
             </UserInfo>
             <BurgerIcon onClick={() => setMenuOpen(!menuOpen)}>
@@ -68,18 +87,23 @@ function Navigation({ active, setActive }) {
                         <span>{item.title}</span>
                     </li>
                 ))}
-                {/* Sign Out Button Styled in Menu */}
-                <li onClick={handleSignOut} className="signout">
-                    {signout}
-                    <span>Sign Out</span>
-                </li>
+                {isAuthenticated ? (
+                    <li onClick={handleSignOut} className="signout">
+                        {signout}
+                        <span>Sign Out</span>
+                    </li>
+                ) : (
+                    <li onClick={() => setIsSignInModalOpen(true)} className="signin">
+                        {signinIcon} 
+                        <span>Sign In</span>
+                    </li>
+                )}
             </Menu>
 
-            {/* Modal for editing name and avatar */}
-            {isModalOpen && (
+            {isProfileModalOpen && (
                 <Modal>
                     <ModalContent>
-                        <CloseButton onClick={() => setIsModalOpen(false)}>✕</CloseButton>
+                        <CloseButton onClick={() => setIsProfileModalOpen(false)}>✕</CloseButton>
                         <h2>Edit Profile</h2>
                         <label>
                             Name:
@@ -97,7 +121,17 @@ function Navigation({ active, setActive }) {
                                 <option value="female">Female</option>
                             </select>
                         </label>
-                        <button onClick={() => setIsModalOpen(false)}>Save</button>
+                        <button onClick={handleProfileSave}>Save</button> {/* Updated: Use handleProfileSave */}
+                    </ModalContent>
+                </Modal>
+            )}
+
+            {isSignInModalOpen && (
+                <Modal>
+                    <ModalContent>
+                        <CloseButton onClick={() => setIsSignInModalOpen(false)}>✕</CloseButton>
+                        <h2>Sign In</h2>
+                        <SignInForm /> 
                     </ModalContent>
                 </Modal>
             )}
@@ -201,7 +235,6 @@ const Menu = styled.ul`
             }
         }
 
-        /* Sign Out Style */
         &.signout {
             color: #f44336;
 
@@ -216,6 +249,15 @@ const Menu = styled.ul`
                     color: red;
                 }
             }
+        }
+
+        &.signin a {
+            color: wheat;
+            text-decoration: none;
+        }
+
+        &.signin:hover a {
+            color: white;
         }
     }
 
@@ -242,7 +284,6 @@ const BurgerIcon = styled.div`
     }
 `;
 
-/* Modal Styles */
 const Modal = styled.div`
   position: fixed;
   top: 0;
@@ -311,7 +352,5 @@ const CloseButton = styled.span`
         color: red;
     }
 `;
-
-
 
 export default Navigation;
