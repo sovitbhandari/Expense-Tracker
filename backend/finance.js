@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const userRoutes = require('./routes/userRoutes');
 const financeRoutes = require('./routes/financeRoutes');  
 
 const app = express();
@@ -24,6 +25,7 @@ mongoose.connect(MNG_DB, {
 .catch((err) => console.log('DB Connection Error:', err));
 
 // Routes
+app.use('/api/v1', userRoutes);
 app.use('/api/v1', financeRoutes); 
 
 
