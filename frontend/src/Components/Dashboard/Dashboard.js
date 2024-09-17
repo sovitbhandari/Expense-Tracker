@@ -6,16 +6,14 @@ import { dollar } from '../../utils/Icons';
 import Chart from '../Chart/Chart';
 
 function Dashboard() {
-    // Fetching the context values and functions
     const { 
         calculateTotalIncome, 
         calculateTotalExpenses, 
         calculateTotalBalance, 
         fetchIncomes, 
-        fetchExpenses 
+        fetchExpenses, 
     } = useGlobalContext();
 
-    // Fetch incomes and expenses when the component mounts
     useEffect(() => {
         fetchIncomes();
         fetchExpenses();
