@@ -60,14 +60,12 @@ const AppStyled = styled.div`
     overflow-y: auto;  
     &::-webkit-scrollbar {
       width: 0;
-      display: none;
     }
   }
 `;
 
 
 export default App;
-
 
 
 
