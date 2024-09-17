@@ -22,9 +22,10 @@ export const plus = <i className="fa-solid fa-plus"></i>
 export const trash = <i className="fa-solid fa-trash"></i>
 export const closeIcon = <i className="fa-solid fa-xmark"></i>
 export const Delete = <i className="fa-solid fa-x"></i>;
-export const signout = <i className="fa-solid fa-right-from-bracket"></i>
+export const signinIcon = <i className="fa-solid fa-right-from-bracket"></i>
 export const takeaway = <i className="fa-solid fa-utensils"></i>
 export const clothing = <i className="fa-solid fa-shirt"></i>
+export const signout = <i className ="fa-solid fa-up-right-from-square"></i>
 export const book = <i className="fa-solid fa-book-open"></i>
 export const food = <i className="fa-solid fa-bowl-food"></i>
 export const medical = <i className="fa-solid fa-briefcase-medical"></i>
