@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 
-// Define the schema for income
-const incomeSchema = new mongoose.Schema({
+const IncomeSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     amount: {
         type: Number,
         required: true
@@ -12,10 +16,13 @@ const incomeSchema = new mongoose.Schema({
     },
     date: {
         type: Date,
-        default: Date.now
-    }
+        required: true
+    },
+    createdAt: {
+        type: Date,
+    },
 });
 
-const Income = mongoose.model('Income', incomeSchema);
-
+IncomeSchema.index({ user: 1, createdAt: -1 });
+const Income = mongoose.model('Income', IncomeSchema);
 module.exports = Income;
