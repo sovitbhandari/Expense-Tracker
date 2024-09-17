@@ -7,7 +7,7 @@ import IncomeItem from '../IncomeItem/IncomeItem';
 import { plus } from '../../utils/Icons';
 import Modal from '../Modal/Modal';
 
-// Function to group and sort expenses by month
+// Function to group expenses by month
 const groupExpensesByMonth = (expenses) => {
     return expenses.reduce((acc, expense) => {
         const month = new Date(expense.date).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -19,24 +19,36 @@ const groupExpensesByMonth = (expenses) => {
     }, {});
 };
 
+// Function to sort expenses by date
 const sortExpensesByDate = (groupedExpenses) => {
-    const sortedMonths = Object.keys(groupedExpenses).sort((a, b) => new Date(b) - new Date(a));
+    const sortedMonths = Object.keys(groupedExpenses).sort((a, b) => {
+        const [monthA, yearA] = a.split(' ');
+        const [monthB, yearB] = b.split(' ');
+
+        const dateA = new Date(`${monthA} 1, ${yearA}`);
+        const dateB = new Date(`${monthB} 1, ${yearB}`);
+
+        return dateB - dateA; // Sort descending by date
+    });
+
     const sortedExpenses = sortedMonths.reduce((acc, month) => {
         acc[month] = groupedExpenses[month].sort((a, b) => new Date(b.date) - new Date(a.date));
         return acc;
     }, {});
+
     return { sortedMonths, sortedExpenses };
 };
 
 function Expenses() {
-    const { expenses, fetchExpenses, removeExpense, calculateTotalExpenses } = useGlobalContext(); // Updated to reflect new function names
+    const { expenses, fetchExpenses, removeExpense, calculateTotalExpenses} = useGlobalContext();
     const [groupedExpenses, setGroupedExpenses] = useState({});
     const [sortedMonths, setSortedMonths] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+
     useEffect(() => {
         const fetchAndGroupExpenses = async () => {
-            await fetchExpenses(); // Fetch expenses using the new function name
+            await fetchExpenses();
             const grouped = groupExpensesByMonth(expenses);
             const { sortedMonths, sortedExpenses } = sortExpensesByDate(grouped);
             setGroupedExpenses(sortedExpenses);
@@ -51,7 +63,7 @@ function Expenses() {
                 <div className="header">
                     <div className="total-expense-container">
                         <h2 className="total-expense">
-                            Total Expense: <span>${calculateTotalExpenses()}</span> {/* Updated to use calculateTotalExpenses */}
+                            Total Expense: <span>${calculateTotalExpenses()}</span>
                         </h2>
                         <button className="add-expense-button" onClick={() => setIsModalOpen(true)}>
                             {plus} Add Expense
@@ -59,7 +71,7 @@ function Expenses() {
                     </div>
                 </div>
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    <ExpenseForm />
+                    <ExpenseForm/>
                 </Modal>
                 <div className="expenses">
                     {sortedMonths.map(month => (
