@@ -1,53 +1,75 @@
-const ExpenseSchema = require('../models/ExpenseModel');
+const Expense = require('../models/ExpenseModel');
 
-exports.getExpense = async (req, res) => {
-    try {
-        const expenses = await ExpenseSchema.find().sort({ createdAt: -1 });
-        return res.status(200).json(expenses);
-    } catch (error) {
-        return res.status(500).json({ message: 'Server Error', error: error.message });
-    }
-};
-
+// Add a new expense
 exports.addExpense = async (req, res) => {
-    let { amount, date, category, customCategory } = req.body;
-
-    amount = Number(amount);
-
     try {
-        if (!amount || !date || !category || (category === 'other' && !customCategory)) {
-            return res.status(400).json({ message: 'All required fields must be provided' });
-        }
+        const { amount, category, date } = req.body;
 
-        if (isNaN(amount) || amount <= 0) {
-            return res.status(400).json({ message: 'Amount must be a positive number' });
-        }
-
-        const expense = new ExpenseSchema({
+        
+        const expense = new Expense({
+            user: req.user.id,  
             amount,
-            date,
-            category: category === 'other' ? customCategory : category
+            category,
+            date
         });
 
-        await expense.save();
-        return res.status(200).json({ message: 'Expense Added' });
+        await expense.save();  
+        res.status(201).json(expense);  
     } catch (error) {
-        return res.status(500).json({ message: 'Server Error', error: error.message });
+        res.status(500).json({ message: 'Server Error', error: error.message });
     }
 };
 
+// Get expenses with pagination
+exports.getExpenses = async (req, res) => {
+    const page = Number(req.query.page) || 1; 
+    const pageSize = Number(req.query.pageSize) || 10; 
+    const skip = (page - 1) * pageSize;  
+
+    try {
+        
+        const totalExpenses = await Expense.countDocuments({ user: req.user.id });
+
+        
+        const expenses = await Expense.find({ user: req.user.id })
+            .sort({ createdAt: -1 })
+            .skip(skip)  
+            .limit(pageSize);  
+
+        // Respond with paginated expenses and pagination details
+        res.status(200).json({
+            expenses,
+            page,
+            pageSize,
+            totalExpenses,
+            totalPages: Math.ceil(totalExpenses / pageSize)
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+};
+
+// Delete an expense by ID for the authenticated user
 exports.deleteExpense = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const result = await ExpenseSchema.findByIdAndDelete(id);
+ 
+        const expense = await Expense.findById(id);
 
-        if (!result) {
+        if (!expense) {
             return res.status(404).json({ message: 'Expense not found' });
         }
 
-        res.status(200).json({ message: 'Expense Deleted' });
+
+        if (expense.user.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'Not authorized to delete this expense' });
+        }
+
+
+        await expense.remove();
+        res.status(200).json({ message: 'Expense deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to delete expense', error: error.message });
     }
 };
