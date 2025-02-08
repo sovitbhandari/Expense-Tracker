@@ -1,146 +1,121 @@
+// Form.js
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { useGlobalContext } from '../../context/globalContext';
-import Button from '../Button/Button';
 import { plus } from '../../utils/Icons';
+import Button from '../Button/Button';
 
-function Form() {
-    const { addIncome, error, setError } = useGlobalContext();
-    const [inputState, setInputState] = useState({
+const Form = ({ onClose }) => {
+  const dispatch = useDispatch();
+  const [inputState, setInputState] = useState({
+    title: '',
+    amount: '',
+    date: '',
+    category: '',
+    description: '',
+  });
+
+  const { title, amount, date, category, description } = inputState;
+
+  const handleInput = name => e => {
+    setInputState({ ...inputState, [name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      // Dispatch your action here
+      await dispatch(/* your add income action */);
+      
+      // Reset form
+      setInputState({
+        title: '',
         amount: '',
         date: '',
         category: '',
-        customCategory: '', 
-    });
-
-    const {amount, date, category, customCategory} = inputState;
-
-    const handleInput = name => e => {
-        setInputState({ ...inputState, [name]: e.target.value });
-        setError('');
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!amount || !date || !category || (category === 'other' && !customCategory)) {
-            setError('Please fill in all required fields.');
-            return;
-        }
-    
-        const finalCategory = category === 'other' ? customCategory : category;
-    
-        try {
-            await addIncome({ amount, date, category: finalCategory }); // Make sure this is correct
-            setInputState({ amount: '', date: '', category: '', customCategory: '' });
-        } catch (error) {
-            console.error(error);
-        }
-    };
-    
-    
-    return (
-        <FormStyled onSubmit={handleSubmit}>
-            {error && <p className='error'>{error}</p>}
-
-            <div className="selects input-control">
-                <select required value={category} name="category" id="category" onChange={handleInput('category')}>
-                    <option value="" disabled>Select Option</option>
-                    <option value="salary">Salary</option>
-                    <option value="freelancing">Freelancing</option>
-                    <option value="investments">Investments</option>
-                    <option value="stocks">Stocks</option>
-                    <option value="bitcoin">Bitcoin</option>
-                    <option value="bank">Bank Transfer</option>
-                    <option value="youtube">YouTube</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-
-            {category === 'other' && (
-                <div className="input-control">
-                    <input
-                        type="text"
-                        value={customCategory}
-                        name="customCategory"
-                        placeholder="Enter Custom Category"
-                        onChange={handleInput('customCategory')}
-                    />
-                </div>
-            )}
-            <div className="input-control">
-                <input
-                    value={amount}
-                    type="text"
-                    name={'amount'}
-                    placeholder={'Enter Amount'}
-                    onChange={handleInput('amount')}
-                />
-            </div>
-            <div className="input-control">
-                <DatePicker
-                    id='date'
-                    placeholderText='Enter A Date'
-                    selected={date}
-                    dateFormat="dd/MM/yyyy"
-                    onChange={date => {
-                        setInputState({ ...inputState, date });
-                    }}
-                />
-            </div>
-
-            <div className="submit-btn">
-                <Button
-                    name={'Add Income'}
-                    icon={plus}
-                    bPad={'.8rem 1.6rem'}
-                    bRad={'30px'}
-                    bg={'#42AD00'}
-                    color={'#fff'}
-                />
-            </div>
-        </FormStyled>
-    );
-}
-
-const FormStyled = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  input, textarea, select {
-    font-family: inherit;
-    font-size: inherit;
-    outline: none;
-    border: none;
-    padding: .5rem 1rem;
-    border-radius: 5px;
-    border: 2px solid #ddd;
-    background: #f8f8f8; 
-    color: black; 
-    &::placeholder {
-      color: Black; 
+        description: '',
+      });
+      
+      // Close modal
+      onClose();
+    } catch (error) {
+      console.error('Error submitting form:', error);
     }
-  }
-  .input-control {
-    input {
-      width: fit-content;
-    }
-  }
-  .selects {
-    display: flex;
-    justify-content: flex-start;
-    select {
-      color: #333;
-    }
-    select:focus {
-      color: #222; 
-    }
-  }
-  .submit-btn {
-    display: flex;
-    justify-content: flex-start;
-  }
-`;
+  };
 
-export default Form;
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <input
+          type="text"
+          value={title}
+          name="title"
+          placeholder="Income Title"
+          onChange={handleInput('title')}
+          className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        />
+        
+        <input
+          type="number"
+          value={amount}
+          name="amount"
+          placeholder="Amount"
+          onChange={handleInput('amount')}
+          className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        />
+
+        <select
+          value={category}
+          name="category"
+          onChange={handleInput('category')}
+          className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        >
+          <option value="" disabled>Select Category</option>
+          <option value="salary">Salary</option>
+          <option value="freelancing">Freelancing</option>
+          <option value="investments">Investments</option>
+          <option value="stocks">Stocks</option>
+          <option value="bitcoin">Cryptocurrency</option>
+          <option value="bank">Bank Transfer</option>
+          <option value="other">Other</option>
+        </select>
+
+        <DatePicker
+          id="date"
+          placeholderText="Enter A Date"
+          selected={date}
+          dateFormat="dd/MM/yyyy"
+          onChange={(date) => {
+            setInputState({ ...inputState, date });
+          }}
+          className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        />
+
+        <textarea
+          value={description}
+          name="description"
+          placeholder="Add A Reference"
+          onChange={handleInput('description')}
+          className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+        />
+      </div>
+
+      <div className="flex justify-end space-x-4">
+        <Button
+          name="Cancel"
+          onClick={onClose}
+          bgColor="bg-gray-500"
+          type="button"
+        />
+        <Button
+          name="Add Income"
+          icon={plus}
+          type="submit"
+          bgColor="bg-green-500"
+        />
+      </div>
+    </form>
+  );
+};
