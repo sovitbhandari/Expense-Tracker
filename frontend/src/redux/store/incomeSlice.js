@@ -8,7 +8,9 @@ const BASE_URL = "https://expense-tracker-backend-p7b5.onrender.com/api/v1/";
 // **Fetch Incomes**
 export const fetchIncomes = createAsyncThunk('income/fetchIncomes', async (_, thunkAPI) => {
     try {
-        const { data } = await axios.get(`${BASE_URL}get-incomes`);
+        const { data } = await axios.get(`${BASE_URL}get-incomes`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+        });
         return data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch incomes');
@@ -18,7 +20,9 @@ export const fetchIncomes = createAsyncThunk('income/fetchIncomes', async (_, th
 // **Add Income**
 export const addIncome = createAsyncThunk('income/addIncome', async (income, thunkAPI) => {
     try {
-        const { data } = await axios.post(`${BASE_URL}add-income`, income);
+        const { data } = await axios.post(`${BASE_URL}add-income`, income, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+        });
         return data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to add income');
@@ -28,7 +32,9 @@ export const addIncome = createAsyncThunk('income/addIncome', async (income, thu
 // **Remove Income**
 export const removeIncome = createAsyncThunk('income/removeIncome', async (id, thunkAPI) => {
     try {
-        await axios.delete(`${BASE_URL}delete-income/${id}`);
+        await axios.delete(`${BASE_URL}delete-income/${id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
+        });
         return id;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to delete income');
