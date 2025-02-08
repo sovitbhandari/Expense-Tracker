@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import {
     Chart as ChartJs,
     ArcElement,
@@ -7,20 +8,32 @@ import {
 } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import styled from 'styled-components';
-import { useGlobalContext } from '../../context/globalContext';
+import { fetchIncomes } from '../../redux/actions/incomeActions';
+import { fetchExpenses } from '../../redux/actions/expenseActions';
 
 ChartJs.register(ArcElement, Tooltip, Legend);
 
 function IncomeExpensePieChart() {
-    const { incomes, expenses } = useGlobalContext();
-    const [chartType, setChartType] = useState('income'); // Track which chart to display
-    const [loading, setLoading] = useState(false); // Loading state for chart switch
+    const dispatch = useDispatch();
+    
+    // Access Redux store for incomes & expenses
+    const incomes = useSelector(state => state.income.incomes);
+    const expenses = useSelector(state => state.expense.expenses);
 
-    // Handle no data available fallback
-    const hasIncomeData = useMemo(() => incomes && incomes.length > 0, [incomes]);
-    const hasExpenseData = useMemo(() => expenses && expenses.length > 0, [expenses]);
+    const [chartType, setChartType] = useState('income');
+    const [loading, setLoading] = useState(false);
 
-    // Prepare income data for the pie chart
+    // Fetch incomes & expenses on component mount
+    useEffect(() => {
+        dispatch(fetchIncomes());
+        dispatch(fetchExpenses());
+    }, [dispatch]);
+
+    // Check if data exists
+    const hasIncomeData = incomes.length > 0;
+    const hasExpenseData = expenses.length > 0;
+
+    // Memoized income data
     const incomeData = useMemo(() => ({
         labels: incomes.map(income => income.category),
         datasets: [
@@ -34,7 +47,7 @@ function IncomeExpensePieChart() {
         ],
     }), [incomes]);
 
-    // Prepare expense data for the pie chart
+    // Memoized expense data
     const expenseData = useMemo(() => ({
         labels: expenses.map(expense => expense.category),
         datasets: [
@@ -48,19 +61,12 @@ function IncomeExpensePieChart() {
         ],
     }), [expenses]);
 
-    // Simulate loading state during chart switching
+    // Handle chart loading effect
     useEffect(() => {
         setLoading(true);
-        const timer = setTimeout(() => setLoading(false), 300); // Simulate a short loading delay
+        const timer = setTimeout(() => setLoading(false), 300);
         return () => clearTimeout(timer);
     }, [chartType]);
-
-    // Pie chart options: Disable animation
-    const chartOptions = {
-        animation: {
-            duration: 0, // Instant animation (set this higher for faster animation)
-        },
-    };
 
     return (
         <ChartStyled>
@@ -75,19 +81,23 @@ function IncomeExpensePieChart() {
 
             {loading ? (
                 <LoadingMessage>Loading chart data...</LoadingMessage>
-            ) : chartType === 'income' && hasIncomeData ? (
-                <PieChartMemo data={incomeData} options={chartOptions} />
-            ) : chartType === 'expense' && hasExpenseData ? (
-                <PieChartMemo data={expenseData} options={chartOptions} />
             ) : (
-                <NoDataMessage>No data available for {chartType === 'income' ? 'income' : 'expenses'}</NoDataMessage>
+                <>
+                    {chartType === 'income' && hasIncomeData ? (
+                        <PieChartMemo data={incomeData} />
+                    ) : chartType === 'expense' && hasExpenseData ? (
+                        <PieChartMemo data={expenseData} />
+                    ) : (
+                        <NoDataMessage>No data available for {chartType}</NoDataMessage>
+                    )}
+                </>
             )}
         </ChartStyled>
     );
 }
 
-// Memoize Pie component to prevent unnecessary re-renders
-const PieChartMemo = React.memo(({ data, options }) => <Pie data={data} options={options} />);
+// Memoized Pie Chart Component
+const PieChartMemo = React.memo(({ data }) => <Pie data={data} options={{ animation: { duration: 0 } }} />);
 
 const ChartStyled = styled.div`
     background: #FCF6F9;
@@ -114,24 +124,21 @@ const ButtonContainer = styled.div`
         cursor: pointer;
         font-size: 1rem;
         transition: background-color 0.3s, opacity 0.3s;
-        pointer-events: ${props => (props.disabled ? 'none' : 'auto')}; 
         
         &:hover {
             opacity: 0.9;
         }
     }
 
-    button:nth-child(1) { /* Income button */
+    button:nth-child(1) {
         background-color: #03A9F4;
-
         &:hover {
             background-color: #0288D1;
         }
     }
 
-    button:nth-child(2) { /* Expenses button */
+    button:nth-child(2) {
         background-color: #F44336;
-
         &:hover {
             background-color: #D32F2F;
         }
