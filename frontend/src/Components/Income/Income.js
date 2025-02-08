@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { useGlobalContext } from '../../context/globalContext';
+import { fetchIncomes, removeIncome } from '../../redux/store/incomeSlice';
 import { InnerLayout } from '../../styles/Layouts';
 import Form from '../Form/Form';
 import IncomeItem from '../IncomeItem/IncomeItem';
@@ -41,27 +42,31 @@ const sortIncomesByDate = (groupedIncomes) => {
 };
 
 const Income = () => {
-    const { incomes, fetchIncomes, removeIncome, calculateTotalIncome } = useGlobalContext();
+    const dispatch = useDispatch();
+    const { incomes, totalIncome } = useSelector((state) => state.income);
+    
     const [groupedIncomes, setGroupedIncomes] = useState({});
     const [sortedMonths, setSortedMonths] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        const fetchAndGroupIncomes = async () => {
-            await fetchIncomes();
-            const grouped = groupIncomesByMonth(incomes);
-            const { sortedMonths, sortedIncomes } = sortIncomesByDate(grouped);
-            setGroupedIncomes(sortedIncomes);
-            setSortedMonths(sortedMonths);
-        };
-        fetchAndGroupIncomes();
-    }, [fetchIncomes, incomes]);
+        dispatch(fetchIncomes());
+    }, [dispatch]);
+
+    useEffect(() => {
+        const grouped = groupIncomesByMonth(incomes);
+        const { sortedMonths, sortedIncomes } = sortIncomesByDate(grouped);
+        setGroupedIncomes(sortedIncomes);
+        setSortedMonths(sortedMonths);
+    }, [incomes]);
 
     return (
         <IncomeStyled>
             <InnerLayout>
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Total Income: <span>${calculateTotalIncome()}</span></h2>
+                    <h2 className="text-2xl font-bold text-gray-800">
+                        Total Income: <span>${totalIncome}</span>
+                    </h2>
                     <Button
                         name="Add Income"
                         icon={plus}
@@ -90,7 +95,7 @@ const Income = () => {
                                         type={type}
                                         category={category}
                                         indicatorColor="var(--color-green)"
-                                        deleteItem={removeIncome}
+                                        deleteItem={() => dispatch(removeIncome(_id))}
                                     />
                                 );
                             })}
