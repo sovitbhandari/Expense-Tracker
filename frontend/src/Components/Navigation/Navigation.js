@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser, updateUserPreferences } from '../../redux/actions/authActions';
 import { signout, burgerIcon, signinIcon } from '../../utils/Icons';
@@ -12,22 +12,20 @@ const Navigation = ({ active, setActive }) => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
-
+    
     const { userPreferences, isAuthenticated } = useSelector((state) => state.auth);
 
-    const handleMenuItemClick = (id) => {
-        setActive(id);
-        setMenuOpen(false);
-    };
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                setIsProfileModalOpen(false);
+                setIsSignInModalOpen(false);
+            }
+        };
 
-    const handleProfileSave = () => {
-        dispatch(updateUserPreferences(userPreferences));
-        setIsProfileModalOpen(false);
-    };
-
-    const handleSignOut = () => {
-        dispatch(logoutUser());
-    };
+        document.addEventListener('keydown', handleEscape);
+        return () => document.removeEventListener('keydown', handleEscape);
+    }, []);
 
     return (
         <header className="fixed top-0 left-0 w-full bg-black flex justify-between items-center p-4 shadow-lg z-50">
@@ -50,17 +48,24 @@ const Navigation = ({ active, setActive }) => {
             </div>
 
             {/* Mobile Burger Icon */}
-            <div className="text-white text-2xl cursor-pointer md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
+            <div 
+                className="text-white text-2xl cursor-pointer md:hidden transition-transform duration-300"
+                onClick={() => setMenuOpen(!menuOpen)}
+            >
                 {burgerIcon}
             </div>
 
             {/* Navigation Menu */}
-            <ul className={`md:flex gap-6 absolute md:relative bg-black w-full md:w-auto left-0 md:top-0 top-16 p-4 md:p-0 ${menuOpen ? 'block' : 'hidden'}`}>
+            <ul 
+                className={`md:flex gap-6 absolute md:relative bg-black w-full md:w-auto left-0 md:top-0 top-16 p-4 md:p-0 
+                transition-transform duration-300 ${menuOpen ? 'block' : 'hidden'}`}
+            >
                 {menuItems.map((item) => (
                     <li
                         key={item.id}
-                        onClick={() => handleMenuItemClick(item.id)}
-                        className={`flex flex-col items-center text-wheat cursor-pointer p-2 hover:text-white transition ${active === item.id ? 'text-white' : ''}`}
+                        onClick={() => setActive(item.id)}
+                        className={`flex flex-col items-center text-wheat cursor-pointer p-2 hover:text-white transition 
+                        ${active === item.id ? 'text-white' : ''}`}
                     >
                         {item.icon}
                         <span className="text-sm">{item.title}</span>
@@ -68,7 +73,7 @@ const Navigation = ({ active, setActive }) => {
                 ))}
 
                 {isAuthenticated ? (
-                    <li onClick={handleSignOut} className="flex flex-col items-center text-red-500 cursor-pointer p-2 hover:text-red-700">
+                    <li onClick={() => dispatch(logoutUser())} className="flex flex-col items-center text-red-500 cursor-pointer p-2 hover:text-red-700">
                         {signout}
                         <span className="text-sm">Sign Out</span>
                     </li>
@@ -82,7 +87,7 @@ const Navigation = ({ active, setActive }) => {
 
             {/* Profile Modal */}
             {isProfileModalOpen && (
-                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50" role="dialog" aria-modal="true">
                     <div className="bg-gradient-to-b from-[#652931] to-[#F2994A] p-6 rounded-lg text-center relative">
                         <button className="absolute top-3 right-3 text-white text-xl" onClick={() => setIsProfileModalOpen(false)}>✕</button>
                         <h2 className="text-white text-xl font-bold">Edit Profile</h2>
@@ -111,7 +116,10 @@ const Navigation = ({ active, setActive }) => {
 
                         <button
                             className="mt-4 bg-green-500 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition"
-                            onClick={handleProfileSave}
+                            onClick={() => {
+                                dispatch(updateUserPreferences(userPreferences));
+                                setIsProfileModalOpen(false);
+                            }}
                         >
                             Save
                         </button>
@@ -121,7 +129,7 @@ const Navigation = ({ active, setActive }) => {
 
             {/* Sign-In Modal */}
             {isSignInModalOpen && (
-                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50" role="dialog" aria-modal="true">
                     <div className="bg-gradient-to-b from-[#652931] to-[#F2994A] p-6 rounded-lg text-center relative">
                         <button className="absolute top-3 right-3 text-white text-xl" onClick={() => setIsSignInModalOpen(false)}>✕</button>
                         <h2 className="text-white text-xl font-bold">Sign In</h2>
