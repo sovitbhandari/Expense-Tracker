@@ -1,45 +1,36 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { useGlobalContext } from '../context/globalContext';
 
 function History() {
-    // Access the recent transactions from the global context
-    const { recentTransactions } = useGlobalContext();
+    // Get recent transactions from Redux store
+    const { incomes } = useSelector((state) => state.income);
+    const { expenses } = useSelector((state) => state.expense);
 
-    // Get the list of recent transactions
-    const history = recentTransactions();
+    // Combine and sort transactions by date
+    const history = [...incomes, ...expenses]
+        .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort descending by date
+        .slice(0, 5); // Limit to recent 5 transactions
 
     return (
         <HistoryStyled>
-    <h2>Recent Transactions</h2>
-    {history.map((transaction) => {
-        const { _id, category, amount, type } = transaction;
-        return (
-            <div key={_id} className="history-item">
-                <p
-                    style={{
-                        color: type === 'expense' ? 'red' : 'var(--color-green)',
-                    }}
-                >
-                    {category}
-                </p>
-
-                <p
-                    style={{
-                        color: type === 'expense' ? 'red' : 'var(--color-green)',
-                    }}
-                >
-                    {type === 'expense'
-                        ? `-${Math.abs(amount).toLocaleString()}`
-                        : `+${amount.toLocaleString()}`}
-                </p>
-            </div>
-        );
-    })}
-</HistoryStyled>
-
-)
-
+            <h2>Recent Transactions</h2>
+            {history.length > 0 ? (
+                history.map(({ _id, category, amount, type }) => (
+                    <div key={_id} className="history-item">
+                        <p style={{ color: type === 'expense' ? 'red' : 'var(--color-green)' }}>
+                            {category}
+                        </p>
+                        <p style={{ color: type === 'expense' ? 'red' : 'var(--color-green)' }}>
+                            {type === 'expense' ? `-${Math.abs(amount).toLocaleString()}` : `+${amount.toLocaleString()}`}
+                        </p>
+                    </div>
+                ))
+            ) : (
+                <p className="no-transactions">No recent transactions.</p>
+            )}
+        </HistoryStyled>
+    );
 }
 
 // Styled-component for History section styling
@@ -64,6 +55,11 @@ const HistoryStyled = styled.div`
         align-items: center;
         z-index: 999;
         transition: background-color 0.3s ease;
+    }
+
+    .no-transactions {
+        text-align: center;
+        color: gray;
     }
 
     @media (max-width: 900px) { 
