@@ -6,6 +6,7 @@ import Form from '../Form/Form';
 import IncomeItem from '../IncomeItem/IncomeItem';
 import { plus } from '../../utils/Icons';
 import Modal from '../Modal/Modal';
+import Button from '../Button/Button';
 
 // Group incomes by month
 const groupIncomesByMonth = (incomes) => {
@@ -39,8 +40,8 @@ const sortIncomesByDate = (groupedIncomes) => {
     return { sortedMonths, sortedIncomes };
 };
 
-function Income() {
-    const { incomes, fetchIncomes, removeIncome, calculateTotalIncome } = useGlobalContext(); // Updated to reflect the new function names
+const Income = () => {
+    const { incomes, fetchIncomes, removeIncome, calculateTotalIncome } = useGlobalContext();
     const [groupedIncomes, setGroupedIncomes] = useState({});
     const [sortedMonths, setSortedMonths] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,19 +60,20 @@ function Income() {
     return (
         <IncomeStyled>
             <InnerLayout>
-                <div className="header">
-                    <div className="total-income-container">
-                        <h2 className="total-income">
-                            Total Income: <span>${calculateTotalIncome()}</span> {/* Updated to use the new calculateTotalIncome */}
-                        </h2>
-                        <button className="add-income-button" onClick={() => setIsModalOpen(true)}>
-                            {plus} Add Income
-                        </button>
-                    </div>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">Total Income: <span>${calculateTotalIncome()}</span></h2>
+                    <Button
+                        name="Add Income"
+                        icon={plus}
+                        onClick={() => setIsModalOpen(true)}
+                        bgColor="bg-green-500"
+                    />
                 </div>
+
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    <Form />
+                    <Form onClose={() => setIsModalOpen(false)} />
                 </Modal>
+
                 <div className="incomes">
                     {sortedMonths.map(month => (
                         <div key={month} className="month-group">
@@ -88,7 +90,7 @@ function Income() {
                                         type={type}
                                         category={category}
                                         indicatorColor="var(--color-green)"
-                                        deleteItem={removeIncome} // Updated to use removeIncome
+                                        deleteItem={removeIncome}
                                     />
                                 );
                             })}
@@ -98,89 +100,26 @@ function Income() {
             </InnerLayout>
         </IncomeStyled>
     );
-}
+};
 
 const IncomeStyled = styled.div`
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     height: 90vh;
-    
-    .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    
-    .total-income-container {
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-        z-index: 998;
-    }
-
-    .total-income {
-        color: #222260;
-        z-index: 999;
-        background: wheat;
-        border: 2px solid #FFFFFF;
-        box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
-        border-radius: 20px;
-        padding: 1rem;
-        margin: 1rem 0;
-        font-size: 1.7rem;
-        gap: .5rem;
-        span {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--color-green);
-        }
-    }
-
-    .add-income-button {
-        font-size: 1.3rem;
-        z-index: 998;
-        background-color: var(--color-accent);
-        color: white;
-        border: none;
-        border-radius: 30px;
-        padding: 0.8rem 1.6rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
-        &:hover {
-            background-color: var(--color-green);
-        }
-    }
 
     .incomes {
         margin-top: 3rem;
         .month-group {
-            border-radius: 10px;
             margin-bottom: 1rem;
-            margin-top: 3rem;
-            opacity: 1;
-            z-index: 1000;
             h3 {
                 background: #FCF6F9;
                 margin-bottom: 0.8rem;
-                width: fit-content;
                 padding: 10px;
                 font-size: 1rem;
                 border-radius: 10px;
-                color: Black;
-                opacity: 1;
+                color: black;
             }
-        }
-    }
-
-    @media (max-width: 700px) {
-        .header .total-income-container {
-            display: grid;
-            gap: 1rem;
-            margin-bottom: 2rem;
         }
     }
 `;
