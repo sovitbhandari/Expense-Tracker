@@ -159,4 +159,4 @@ const NoDataMessage = styled.div`
     margin-top: 2rem;
 `;
 
-export default IncomeExpensePieChart;
+export default Chart;
