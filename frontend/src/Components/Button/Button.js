@@ -1,19 +1,13 @@
+import React from 'react';
+import styled from 'styled-components';
 
-import React from 'react'
-import styled from 'styled-components'
-
-function Button({name, icon, onClick, bg, bPad, color, bRad}) {
+function Button({ name, icon, onClick, bg = '#42AD00', bPad = '.8rem 1.6rem', color = '#fff', bRad = '30px' }) {
     return (
-        <ButtonStyled style={{
-            background: bg,
-            padding: bPad,
-            borderRadius: bRad,
-            color: color,
-        }} onClick={onClick}>
+        <ButtonStyled bg={bg} bPad={bPad} bRad={bRad} color={color} onClick={onClick}>
             {icon}
             {name}
         </ButtonStyled>
-    )
+    );
 }
 
 const ButtonStyled = styled.button`
@@ -23,10 +17,19 @@ const ButtonStyled = styled.button`
     font-size: inherit;
     display: flex;
     align-items: center;
-    gap: .5rem;
+    justify-content: center;
+    gap: 0.5rem;
     cursor: pointer;
-    transition: all .4s ease-in-out;
+    padding: ${({ bPad }) => bPad};
+    border-radius: ${({ bRad }) => bRad};
+    background: ${({ bg }) => bg};
+    color: ${({ color }) => color};
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
 `;
 
-
-export default Button
+export default Button;
