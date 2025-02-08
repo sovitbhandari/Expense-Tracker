@@ -173,4 +173,4 @@ const AuthFormStyled = styled.form`
   }
 `;
 
-export default AuthForm;
+export default SignInUp;
