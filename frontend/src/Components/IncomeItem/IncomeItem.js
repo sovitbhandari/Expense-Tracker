@@ -1,18 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
+import { removeIncome } from '../../redux/store/incomeSlice';
 import { dateFormat } from '../../utils/dateFormat';
 import { bitcoin, book, calender, card, circle, clothing, dollar, food, freelance, medical, money, stocks, takeaway, Delete, tv, users, yt } from '../../utils/Icons';
 import Button from '../Button/Button';
 
-function IncomeItem({
-    id,
-    amount,
-    date,
-    category,
-    deleteItem,
-    indicatorColor,
-    type
-}) {
+function IncomeItem({ id, amount, date, category, indicatorColor }) {
+    const dispatch = useDispatch();
 
     const categoryIcon = () => {
         switch (category) {
@@ -69,11 +64,11 @@ function IncomeItem({
                             icon={Delete}
                             bPad={'1rem'}
                             bRad={'50%'}
-                            bg={'var(--primary-color'}
+                            bg={'var(--primary-color)'} 
                             color={'#FF0000'}
                             iColor={'#FF0000'}
                             hColor={'#FF0000'}
-                            onClick={() => deleteItem(id)}
+                            onClick={() => dispatch(removeIncome(id))}
                         />
                     </div>
                 </div>
@@ -83,7 +78,6 @@ function IncomeItem({
 }
 
 const IncomeItemStyled = styled.div`
-    // background: #FCF6F9;
     border: 2px solid #FFFFFF;
     box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
     border-radius: 20px;
@@ -94,6 +88,7 @@ const IncomeItemStyled = styled.div`
     gap: 1rem;
     width: 100%;
     color: #222260;
+    
     .icon{
         width: 80px;
         height: 60px;
