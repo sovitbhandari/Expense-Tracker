@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { useGlobalContext } from '../../context/globalContext';
+import styled from 'styled-components';
+import { addExpense } from '../../redux/actions/expenseActions'; 
 import Button from '../Button/Button';
 import { plus } from '../../utils/Icons';
 
 function ExpenseForm() {
-    const { addExpense, error, setError } = useGlobalContext();
+    const dispatch = useDispatch();
+    const error = useSelector(state => state.expense.error);
     const [inputState, setInputState] = useState({
         amount: '',
         date: '',
@@ -15,24 +17,23 @@ function ExpenseForm() {
         customCategory: '', 
     });
 
-    const {amount, date, category, customCategory} = inputState;
+    const { amount, date, category, customCategory } = inputState;
 
     const handleInput = name => e => {
         setInputState({ ...inputState, [name]: e.target.value });
-        setError('');
     };
 
     const handleSubmit = e => {
         e.preventDefault();
         
         if (!amount || !date || !category || (category === 'other' && !customCategory)) {
-            setError('Please fill in all required fields.');
+            alert('Please fill in all required fields.'); // Alert for better user feedback
             return;
         }
 
         const finalCategory = category === 'other' ? customCategory : category;
-    
-        addExpense({ amount, date, category: finalCategory});
+        dispatch(addExpense({ amount, date, category: finalCategory }));
+
         setInputState({
             amount: '',
             date: '',
@@ -43,7 +44,7 @@ function ExpenseForm() {
 
     return (
         <ExpenseFormStyled onSubmit={handleSubmit}>
-            {error && <p className='error'>{error}</p>}
+            {error && <p className='error text-red-500'>{error}</p>}
 
             <div className="selects input-control">
                 <select required value={category} name="category" id="category" onChange={handleInput('category')}>
@@ -70,24 +71,24 @@ function ExpenseForm() {
                     />
                 </div>
             )}
+
             <div className="input-control">
                 <input
                     value={amount}
-                    type="text"
+                    type="number"
                     name={'amount'}
                     placeholder={'Enter Amount'}
                     onChange={handleInput('amount')}
                 />
             </div>
+
             <div className="input-control">
                 <DatePicker
                     id='date'
                     placeholderText='Enter A Date'
                     selected={date}
                     dateFormat="dd/MM/yyyy"
-                    onChange={date => {
-                        setInputState({ ...inputState, date });
-                    }}
+                    onChange={date => setInputState({ ...inputState, date })}
                 />
             </div>
 
