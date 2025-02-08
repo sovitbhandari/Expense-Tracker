@@ -1,43 +1,39 @@
-
-import React from 'react';
-import styled from 'styled-components';
+import React, { useEffect } from 'react';
 
 const Modal = ({ isOpen, onClose, children }) => {
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <Overlay onClick={onClose}>
-      <ModalContent onClick={e => e.stopPropagation()}>
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-gradient-to-b from-[#652931] to-[#F2994A] p-8 rounded-lg shadow-xl w-11/12 max-w-2xl transform transition-all"
+        onClick={(e) => e.stopPropagation()}
+      >
         {children}
-      </ModalContent>
-    </Overlay>
+      </div>
+    </div>
   );
 };
-
-const Overlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(5px);
-  z-index: 1000; /* Ensure it's on top of other content */
-`;
-
-const ModalContent = styled.div`
-    background: linear-gradient(180deg, #652931 100%, #F2994A 100%);
-    animation: 15s alternate linear infinite;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 500px;
-    opacity:1;
-`;
-
-
 
 export default Modal;
