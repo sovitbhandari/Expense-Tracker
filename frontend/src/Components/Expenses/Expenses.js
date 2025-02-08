@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { useGlobalContext } from '../../context/globalContext';
+import { fetchExpenses, removeExpense } from '../../redux/actions/expenseActions';
 import { InnerLayout } from '../../styles/Layouts';
 import ExpenseForm from './ExpenseForm';
 import IncomeItem from '../IncomeItem/IncomeItem';
@@ -40,22 +41,23 @@ const sortExpensesByDate = (groupedExpenses) => {
 };
 
 function Expenses() {
-    const { expenses, fetchExpenses, removeExpense, calculateTotalExpenses} = useGlobalContext();
+    const dispatch = useDispatch();
+    const expenses = useSelector(state => state.expense.expenses);
+    const totalExpenses = useSelector(state => state.expense.totalExpenses);
     const [groupedExpenses, setGroupedExpenses] = useState({});
     const [sortedMonths, setSortedMonths] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    useEffect(() => {
+        dispatch(fetchExpenses());
+    }, [dispatch]);
 
     useEffect(() => {
-        const fetchAndGroupExpenses = async () => {
-            await fetchExpenses();
-            const grouped = groupExpensesByMonth(expenses);
-            const { sortedMonths, sortedExpenses } = sortExpensesByDate(grouped);
-            setGroupedExpenses(sortedExpenses);
-            setSortedMonths(sortedMonths);
-        };
-        fetchAndGroupExpenses();
-    }, [fetchExpenses, expenses]);
+        const grouped = groupExpensesByMonth(expenses);
+        const { sortedMonths, sortedExpenses } = sortExpensesByDate(grouped);
+        setGroupedExpenses(sortedExpenses);
+        setSortedMonths(sortedMonths);
+    }, [expenses]);
 
     return (
         <ExpenseStyled>
@@ -63,7 +65,7 @@ function Expenses() {
                 <div className="header">
                     <div className="total-expense-container">
                         <h2 className="total-expense">
-                            Total Expense: <span>${calculateTotalExpenses()}</span>
+                            Total Expense: <span>${totalExpenses}</span>
                         </h2>
                         <button className="add-expense-button" onClick={() => setIsModalOpen(true)}>
                             {plus} Add Expense
@@ -71,7 +73,7 @@ function Expenses() {
                     </div>
                 </div>
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    <ExpenseForm/>
+                    <ExpenseForm />
                 </Modal>
                 <div className="expenses">
                     {sortedMonths.map(month => (
@@ -89,7 +91,7 @@ function Expenses() {
                                         type={type}
                                         category={category}
                                         indicatorColor="var(--color-red)"
-                                        deleteItem={removeExpense}
+                                        deleteItem={(id) => dispatch(removeExpense(id))}
                                     />
                                 );
                             })}
