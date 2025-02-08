@@ -1,14 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './reducers/authReducer';
 import incomeReducer from './reducers/incomeReducer';
 import expenseReducer from './reducers/expenseReducer';
+import userReducer from './reducers/userReducer';
 
 const store = configureStore({
-    reducer: {
-        auth: authReducer,
-        income: incomeReducer,
-        expenses: expenseReducer
-    }
+  reducer: {
+    income: incomeReducer,
+    expense: expenseReducer,
+    user: userReducer
+  }
 });
 
 export default store;
