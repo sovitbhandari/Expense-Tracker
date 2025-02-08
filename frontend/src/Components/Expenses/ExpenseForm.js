@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import styled from 'styled-components';
-import { addExpense } from '../../redux/actions/expenseActions'; 
+import { fetchExpenses, removeExpense } from '../../redux/store/expenseSlice';
 import Button from '../Button/Button';
 import { plus } from '../../utils/Icons';
 
