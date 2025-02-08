@@ -1,214 +1,49 @@
 import React, { useEffect } from 'react';
-import styled from 'styled-components';
-import { useGlobalContext } from '../../context/globalContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchIncomes } from '../../redux/actions/incomeActions';
+import { fetchExpenses } from '../../redux/actions/expenseActions';
 import History from '../../History/History';
-import { dollar } from '../../utils/Icons';
 import Chart from '../Chart/Chart';
+import { dollar } from '../../utils/Icons';
 
-function Dashboard() {
-    const { 
-        calculateTotalIncome, 
-        calculateTotalExpenses, 
-        calculateTotalBalance, 
-        fetchIncomes, 
-        fetchExpenses, 
-    } = useGlobalContext();
+const Dashboard = () => {
+    const dispatch = useDispatch();
+    const { totalIncome } = useSelector((state) => state.incomes);
+    const { totalExpenses } = useSelector((state) => state.expenses);
+    const balance = totalIncome - totalExpenses;
 
     useEffect(() => {
-        fetchIncomes();
-        fetchExpenses();
-    }, [fetchIncomes, fetchExpenses]);
+        dispatch(fetchIncomes());
+        dispatch(fetchExpenses());
+    }, [dispatch]);
 
     return (
-        <DashboardStyled>
-            <div className="chart-container">
-                <h1>Spending Report</h1>
-                <Chart />
-                <div className="balance">
-                    <h2>Remaining Balance</h2>
-                    <p>{dollar} {calculateTotalBalance()}</p>
+        <div className="flex flex-col items-center p-6">
+            <h1 className="text-2xl font-bold text-center text-wheat">Spending Report</h1>
+            <Chart />
+
+            <div className="mt-4 bg-white p-4 rounded-lg shadow-md text-center">
+                <h2 className="text-xl font-semibold">Remaining Balance</h2>
+                <p className="text-green-600 text-lg font-bold">{dollar} {balance}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 w-full">
+                <div className="bg-gray-100 p-4 rounded-lg shadow-md text-center">
+                    <h2 className="text-xl font-semibold">Total Income</h2>
+                    <p className="text-green-600 text-lg font-bold">{dollar} {totalIncome}</p>
+                </div>
+
+                <div className="bg-gray-100 p-4 rounded-lg shadow-md text-center">
+                    <h2 className="text-xl font-semibold">Total Expense</h2>
+                    <p className="text-red-500 text-lg font-bold">{dollar} {totalExpenses}</p>
                 </div>
             </div>
-            <div className="stats-con">
-                <div className="chart-con">
-                    <div className="amount-con">
-                        <div className="income">
-                            <h2>Total Income</h2>
-                            <p id="total-income">{dollar} {calculateTotalIncome()}</p>
-                        </div>
-                        <div className="expense">
-                            <h2>Total Expense</h2>
-                            <p id="total-expense">{dollar} {calculateTotalExpenses()}</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="history-con">
-                    <History />
-                </div>
+
+            <div className="w-full mt-6">
+                <History />
             </div>
-        </DashboardStyled>
+        </div>
     );
-}
-
-const DashboardStyled = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 2rem;
-    padding: 2rem 1.5rem;
-
-    .chart-container {
-        display: grid;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        z-index: 999;
-
-        h1{
-            margin-bottom: 1rem;
-            color: wheat;
-            text-align: center;
-            z-index: 999;
-        }
-
-        .balance {
-            background: white;
-            margin-top: 3rem;
-            border: 2px solid #FFFFFF;
-            box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
-            border-radius: 20px;
-            padding: 1rem;
-            z-index: 999;
-            white-space: nowrap;
-
-            h2 {
-                font-size: 1.7rem;
-                font-weight: bold;
-            }
-
-            p {
-                font-weight: 500;
-                font-size: 1.5rem;
-                color: var(--color-green);
-            }
-        }
-    }
-
-    .stats-con {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-        width: 100%;
-
-        .chart-con {
-            .amount-con {
-                display: flex;
-                align-item: center;
-                justify-content: space-evenly;
-                gap: 0.3rem;
-                margin-top: 2rem;
-                width: 95%;
-
-                .income, .expense {
-                    background: #FCF6F9;
-                    border: 2px solid #FFFFFF;
-                    box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.06);
-                    border-radius: 15px;
-                    padding: 0.8rem;
-                    z-index: 999;
-                    white-space: nowrap;
-                    overflow: hidden;
-
-                    h2 {
-                        font-size: 1.7rem;
-                        font-weight: bold;
-                    }
-
-                    p {
-                        font-weight: 500;
-                        font-size: 1.5rem;
-                    }
-                }
-            }
-        }
-
-        .history-con {
-            h2 {
-                margin: 1rem 0;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-            }
-        }
-    }
-
-    @media (max-width: 900px) {
-        flex-direction: column;
-        justify-content: space-between;
-        height: auto;
-        margin: 0 auto;
-        gap: 1rem;
-
-        .chart-container, .stats-con {
-            width: 100%;
-            z-index: 999;
-        }
-
-        .chart-container {
-            margin-bottom: 2rem;
-        }
-    }
-
-    @media (max-width: 600px) {
-        .chart-container {
-            transform: scale(0.9);
-            
-            .balance {
-                padding: 0.5rem;
-                h2 {
-                    font-size: 1.4rem;
-                    font-weight: bold;
-                }
-
-                p {
-                    font-weight: 500;
-                    font-size: 1.3rem;
-                    color: var(--color-green);
-                }
-            }
-        }
-
-        .stats-con {
-            .chart-con {
-                .amount-con {
-                    width:100%;
-                    margin-top: 0rem;
-                    
-                    .income, .expense {
-                        padding: 0.5rem;
-
-                        #total-income{
-                            color: var(--color-green);
-                        }
-
-                        #total-expense{
-                            color: var(--color-red);
-                        }
-
-                        h2 {
-                            font-size: 1rem;
-                            font-weight: bold;
-                        }
-
-                        p {
-                            font-weight: 600;
-                            font-size: 1rem;
-                        }
-                    }
-                }
-            }
-        }
-    }
-`;
+};
 
 export default Dashboard;
