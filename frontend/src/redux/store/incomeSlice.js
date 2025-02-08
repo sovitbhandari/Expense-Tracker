@@ -3,13 +3,13 @@ import axios from 'axios';
 
 const BASE_URL = "https://expense-tracker-backend-p7b5.onrender.com/api/v1/";
 
-// Async action to fetch incomes
+// ✅ Async action to fetch incomes
 export const fetchIncomes = createAsyncThunk(
   'income/fetchIncomes',
   async (_, thunkAPI) => {
     try {
       const { data } = await axios.get(`${BASE_URL}get-incomes`);
-      return Array.isArray(data) ? data : []; // Ensure data is an array
+      return Array.isArray(data) ? data : []; // Ensure API response is an array
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch incomes');
     }
@@ -19,12 +19,12 @@ export const fetchIncomes = createAsyncThunk(
 const incomeSlice = createSlice({
   name: 'income',
   initialState: {
-    incomes: [],
-    totalIncome: 0, // Added totalIncome field
+    incomes: [],      // Stores fetched income data
+    totalIncome: 0,   // Stores the total income value
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {}, // No standard reducers added (handled via async thunks)
   extraReducers: (builder) => {
     builder
       .addCase(fetchIncomes.pending, (state) => {
@@ -34,7 +34,7 @@ const incomeSlice = createSlice({
       .addCase(fetchIncomes.fulfilled, (state, action) => {
         state.loading = false;
         state.incomes = action.payload;
-        state.totalIncome = action.payload.reduce((acc, income) => acc + (income.amount || 0), 0); // Compute total income
+        state.totalIncome = action.payload.reduce((acc, income) => acc + (income.amount || 0), 0); // ✅ Calculate total income
       })
       .addCase(fetchIncomes.rejected, (state, action) => {
         state.loading = false;
