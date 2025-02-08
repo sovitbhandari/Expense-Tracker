@@ -4,14 +4,14 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { plus } from '../../utils/Icons';
 import Button from '../Button/Button';
-import { addIncome } from '../../redux/actions/incomeActions';
+import { addIncome } from '../../redux/store/incomeSlice';  // Updated import
 
 const Form = ({ onClose }) => {
   const dispatch = useDispatch();
   const [inputState, setInputState] = useState({
     title: '',
     amount: '',
-    date: '',
+    date: new Date(),  // Default to today's date
     category: '',
     description: '',
   });
@@ -25,14 +25,20 @@ const Form = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title || !amount || !date || !category) {
-      alert('Please fill all required fields!');
+    if (!title || !amount || amount <= 0 || !date || !category) {
+      alert('Please enter valid data!');
       return;
     }
 
     try {
-      await dispatch(addIncome({ title, amount, date, category, description }));
-      setInputState({ title: '', amount: '', date: '', category: '', description: '' });
+      await dispatch(addIncome({
+        title,
+        amount: parseFloat(amount), // Ensure numeric conversion
+        date,
+        category,
+        description
+      }));
+      setInputState({ title: '', amount: '', date: new Date(), category: '', description: '' });
       onClose();
     } catch (error) {
       console.error('Error submitting form:', error);
