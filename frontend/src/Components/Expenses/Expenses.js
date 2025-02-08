@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchExpenses, removeExpense } from '../../redux/reducers/expenseSlice';
+import { fetchExpenses, removeExpense } from '../../redux/store/expenseSlice';
 import { InnerLayout } from '../../styles/Layouts';
 import ExpenseForm from './ExpenseForm';
 import IncomeItem from '../IncomeItem/IncomeItem';
