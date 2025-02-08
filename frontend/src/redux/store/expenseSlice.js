@@ -1,14 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const BASE_URL = "https://expense-tracker-backend-p7b5.onrender.com/api/v1/";
+const BASE_URL = "https://expense-tracker-backend-p7b5.onrender.com/api/v1";
+
+// Helper function to get Auth Headers
+const getAuthHeaders = () => ({
+    headers: {
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+    },
+});
 
 // **📌 Async Actions for Expenses**
 
 // **Fetch Expenses**
 export const fetchExpenses = createAsyncThunk('expense/fetchExpenses', async (_, thunkAPI) => {
     try {
-        const { data } = await axios.get(`${BASE_URL}get-expenses`);
+        const { data } = await axios.get(`${BASE_URL}/get-expenses`, getAuthHeaders());
         return data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch expenses');
@@ -18,7 +25,7 @@ export const fetchExpenses = createAsyncThunk('expense/fetchExpenses', async (_,
 // **Add Expense**
 export const addExpense = createAsyncThunk('expense/addExpense', async (expense, thunkAPI) => {
     try {
-        const { data } = await axios.post(`${BASE_URL}add-expense`, expense);
+        const { data } = await axios.post(`${BASE_URL}/add-expense`, expense, getAuthHeaders());
         return data;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to add expense');
@@ -28,7 +35,7 @@ export const addExpense = createAsyncThunk('expense/addExpense', async (expense,
 // **Remove Expense**
 export const removeExpense = createAsyncThunk('expense/removeExpense', async (id, thunkAPI) => {
     try {
-        await axios.delete(`${BASE_URL}delete-expense/${id}`);
+        await axios.delete(`${BASE_URL}/delete-expense/${id}`, getAuthHeaders());
         return id;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to delete expense');
@@ -50,7 +57,7 @@ const expenseSlice = createSlice({
             .addCase(fetchExpenses.fulfilled, (state, action) => {
                 state.loading = false;
                 state.expenses = action.payload;
-                state.totalExpenses = action.payload.reduce((total, expense) => total + expense.amount, 0);
+                state.totalExpenses = action.payload.reduce((total, expense) => total + Number(expense.amount), 0);
             })
             .addCase(fetchExpenses.rejected, (state, action) => {
                 state.loading = false;
@@ -64,7 +71,7 @@ const expenseSlice = createSlice({
             .addCase(addExpense.fulfilled, (state, action) => {
                 state.loading = false;
                 state.expenses.push(action.payload);
-                state.totalExpenses += action.payload.amount;
+                state.totalExpenses = state.expenses.reduce((total, expense) => total + Number(expense.amount), 0);
             })
             .addCase(addExpense.rejected, (state, action) => {
                 state.loading = false;
@@ -78,7 +85,7 @@ const expenseSlice = createSlice({
             .addCase(removeExpense.fulfilled, (state, action) => {
                 state.loading = false;
                 state.expenses = state.expenses.filter(expense => expense._id !== action.payload);
-                state.totalExpenses = state.expenses.reduce((total, expense) => total + expense.amount, 0);
+                state.totalExpenses = state.expenses.reduce((total, expense) => total + Number(expense.amount), 0);
             })
             .addCase(removeExpense.rejected, (state, action) => {
                 state.loading = false;
